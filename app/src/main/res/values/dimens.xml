@@ -1,0 +1,20 @@
+<resources>
+    <dimen name="content_margin">16dp</dimen>
+    <dimen name="recycler_spacing">8dp</dimen>
+    <dimen name="genre_fading_edge">12dp</dimen>
+    <dimen name="genre_row_pivot_x">0dp</dimen>
+    <dimen name="genre_row_pivot_y">15dp</dimen>
+    <dimen name="genre_item_width">206dp</dimen>
+    <dimen name="genre_row_height">48dp</dimen>
+    <dimen name="genre_text_size">20sp</dimen>
+    <dimen name="genre_alignment_y">167dp</dimen>
+    <dimen name="genre_padding_start">56dp</dimen>
+    <dimen name="frame_margin">24dp</dimen>
+    <dimen name="movie_card_height">200dp</dimen>
+    <dimen name="movie_card_width">180dp</dimen>
+    <dimen name="movie_card_elevation">8dp</dimen>
+    <dimen name="movie_details_height">56dp</dimen>
+    <item name="select_duration" format="integer" type="dimen">150</item>
+    <item name="unselect_alpha" type="fraction">50%</item>
+    <item name="select_scale" format="float" type="dimen">1.2</item>
+</resources>

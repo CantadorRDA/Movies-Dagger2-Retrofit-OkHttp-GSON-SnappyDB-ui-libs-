@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Movies</string>
+    <string name="base_url">https://api.androidhive.info/json/</string>
+    <string name="genre">genre</string>
+    <string name="movie_title">Movie Title</string>
+    <string name="sort_by_year">Sort by year</string>
+    <string name="sort_by_rating">Sort by rating</string>
+    <string name="no_connection">Connect your device to internet and relaunch application</string>
+</resources>
