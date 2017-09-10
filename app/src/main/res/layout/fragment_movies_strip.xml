@@ -5,9 +5,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
+    android:paddingLeft="@dimen/content_margin"
+    android:background="@color/colorPrimary"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:openDrawer="start">
+    android:fitsSystemWindows="true">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"
@@ -121,8 +122,7 @@
         android:background="@color/colorPrimary"
         android:fitsSystemWindows="true"
         android:paddingLeft="@dimen/genre_padding_start"
-        android:paddingStart="@dimen/genre_padding_start"
-        android:visibility="gone">
+        android:paddingStart="@dimen/genre_padding_start">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/genres_recycler"
@@ -134,7 +134,6 @@
             android:paddingTop="@dimen/genre_alignment_y"
             app:layoutManager="android.support.v7.widget.LinearLayoutManager"
             tools:listitem="@layout/item_genre"/>
-
 
     </android.support.design.widget.NavigationView>
 
