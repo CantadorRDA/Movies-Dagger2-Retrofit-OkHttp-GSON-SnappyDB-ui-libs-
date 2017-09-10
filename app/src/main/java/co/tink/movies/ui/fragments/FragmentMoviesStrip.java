@@ -1,8 +1,11 @@
 package co.tink.movies.ui.fragments;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
@@ -24,8 +28,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import co.tink.movies.MoviesApplication;
 import co.tink.movies.R;
-import co.tink.movies.ui.activities.ActivityMain;
 import co.tink.movies.ui.adapters.AdapterGenres;
 import co.tink.movies.ui.adapters.AdapterMoviesStrip;
 import co.tink.movies.ui.api.Api;
@@ -35,12 +41,16 @@ import jp.wasabeef.blurry.Blurry;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
 
 /**
  * Created by Cantador on 09.09.17.
  */
 
 public class FragmentMoviesStrip extends Fragment {
+
+  @Inject
+  Retrofit retrofit;
 
   private RecyclerView genresRecycler;
   private RecyclerView moviesStripRecycler;
@@ -50,6 +60,7 @@ public class FragmentMoviesStrip extends Fragment {
   private FloatingActionButton sortByYear;
   private FloatingActionButton sortByRating;
   private SwipeRefreshLayout swipeRefresh;
+  private DrawerLayout drawerLayout;
 
   private AdapterMoviesStrip adapter;
 
@@ -57,12 +68,16 @@ public class FragmentMoviesStrip extends Fragment {
 
   private DB snappydb;
 
-  private boolean firstLaunch = true;
+  private boolean initialResponce = true;
   private boolean sorted = false;
   private String genre = null;
 
+  private SharedPreferences prefs;
+
   private List<Movie> moviesList = new ArrayList<>();
   private List<String> genresList = new ArrayList<>();
+
+  private static final String FIRST_LAUNCH = "first_launch";
 
   private View.OnClickListener onFabClick() {
     return new View.OnClickListener() {
@@ -83,13 +98,35 @@ public class FragmentMoviesStrip extends Fragment {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    ((MoviesApplication) getActivity().getApplication()).getNetworkComponent().inject(this);
   }
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View rootView = inflater.inflate(R.layout.fragment_movies_strip, container, false);
     initViews(rootView);
+    return rootView;
+  }
+
+  @Override
+  public void onResume(){
+    super.onResume();
     networkCheck = new NetworkCheck();
+    prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+    if (prefs.contains(FIRST_LAUNCH)){
+      initialize();
+    } else {
+      if (networkCheck.isNetworkAvailable(getActivity())){
+        initialize();
+        prefs.edit().putBoolean(FIRST_LAUNCH, false).apply();
+      } else {
+        Toast.makeText(getActivity(), getResources().getString(R.string.no_connection), Toast.LENGTH_SHORT).show();
+        drawerLayout.setVisibility(View.GONE);
+      }
+    }
+  }
+
+  private void initialize(){
     sortFAB.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -103,7 +140,6 @@ public class FragmentMoviesStrip extends Fragment {
     genres();
     moviesStrip();
     swipeRefresh();
-    return rootView;
   }
 
   private void initViews(View rootView) {
@@ -115,14 +151,14 @@ public class FragmentMoviesStrip extends Fragment {
     sortByYear = rootView.findViewById(R.id.sort_by_year);
     sortByRating = rootView.findViewById(R.id.sort_by_rating);
     swipeRefresh = rootView.findViewById(R.id.swipe_refresh);
+    drawerLayout = rootView.findViewById(R.id.drawer_layout);
   }
 
   private void genres() {
 
     if (networkCheck.isNetworkAvailable(getActivity())) {
 
-      final Call<List<Movie>> movies = ((ActivityMain) getActivity())
-          .getRetrofit().create(Api.class).getMovies();
+      final Call<List<Movie>> movies = retrofit.create(Api.class).getMovies();
 
       movies.enqueue(new Callback<List<Movie>>() {
         @Override
@@ -154,8 +190,7 @@ public class FragmentMoviesStrip extends Fragment {
 
     if (networkCheck.isNetworkAvailable(getActivity())) {
 
-      final Call<List<Movie>> movies = ((ActivityMain) getActivity())
-          .getRetrofit().create(Api.class).getMovies();
+      final Call<List<Movie>> movies = retrofit.create(Api.class).getMovies();
 
       movies.enqueue(new Callback<List<Movie>>() {
         @Override
@@ -167,7 +202,7 @@ public class FragmentMoviesStrip extends Fragment {
             moviesList.addAll(response.body());
           }
 
-          if (firstLaunch) {
+          if (initialResponce) {
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
             linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
             adapter = new AdapterMoviesStrip(
@@ -175,7 +210,7 @@ public class FragmentMoviesStrip extends Fragment {
             moviesStripRecycler.setLayoutManager(linearLayoutManager);
             moviesStripRecycler.setAdapter(adapter);
             progressBar.setVisibility(View.GONE);
-            firstLaunch = !firstLaunch;
+            initialResponce = !initialResponce;
           } else {
             adapter.notifyDataSetChanged();
           }
@@ -204,7 +239,7 @@ public class FragmentMoviesStrip extends Fragment {
           moviesList.addAll(savedList);
         }
 
-        if (firstLaunch) {
+        if (initialResponce) {
           LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
           linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
           adapter = new AdapterMoviesStrip(
@@ -212,7 +247,7 @@ public class FragmentMoviesStrip extends Fragment {
           moviesStripRecycler.setLayoutManager(linearLayoutManager);
           moviesStripRecycler.setAdapter(adapter);
           progressBar.setVisibility(View.GONE);
-          firstLaunch = !firstLaunch;
+          initialResponce = !initialResponce;
         } else {
           moviesStripRecycler.post(new Runnable() {
             @Override
@@ -236,7 +271,7 @@ public class FragmentMoviesStrip extends Fragment {
 
   public void setGenre(String genre) {
     this.genre = genre;
-    firstLaunch = !firstLaunch;
+    initialResponce = !initialResponce;
     moviesList = new ArrayList<>();
     moviesStrip();
   }
@@ -297,7 +332,7 @@ public class FragmentMoviesStrip extends Fragment {
           } catch (SnappydbException e) {
 
           }
-          firstLaunch = !firstLaunch;
+          initialResponce = !initialResponce;
           moviesList = new ArrayList<>();
           moviesStrip();
         }

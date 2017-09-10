@@ -11,6 +11,7 @@
     <dimen name="genre_padding_start">56dp</dimen>
     <dimen name="frame_margin">24dp</dimen>
     <dimen name="movie_card_height">200dp</dimen>
+    <dimen name="movie_recycler_height">264dp</dimen>
     <dimen name="movie_card_width">180dp</dimen>
     <dimen name="movie_card_elevation">8dp</dimen>
     <dimen name="movie_details_height">56dp</dimen>

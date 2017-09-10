@@ -6,6 +6,7 @@ import co.tink.movies.ui.activities.ActivityMain;
 
 import javax.inject.Singleton;
 
+import co.tink.movies.ui.fragments.FragmentMoviesStrip;
 import dagger.Component;
 
 /**
@@ -15,5 +16,5 @@ import dagger.Component;
 @Singleton
 @Component(modules = {ApplicationModule.class, NetworkModule.class})
 public interface NetworkComponent {
-  void inject(ActivityMain activity);
+  void inject(FragmentMoviesStrip fragmentMoviesStrip);
 }
