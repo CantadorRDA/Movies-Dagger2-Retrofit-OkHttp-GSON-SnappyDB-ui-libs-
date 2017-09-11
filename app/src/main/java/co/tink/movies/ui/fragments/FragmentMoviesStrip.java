@@ -336,6 +336,8 @@ public class FragmentMoviesStrip extends Fragment {
           }
           initialResponce = !initialResponce;
           moviesList = new ArrayList<>();
+          genresList = new ArrayList<>();
+          genres();
           moviesStrip();
         }
       });
